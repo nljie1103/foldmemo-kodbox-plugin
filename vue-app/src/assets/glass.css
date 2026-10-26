@@ -1,0 +1,139 @@
+/* FoldMemo v2.0.0 — restored v1.0.4-inspired glass workspace.
+   This layer is intentionally scoped to the DEFAULT style.
+   Note Desk (minimal) and shadcn-vue (modern) remain opaque and independent. */
+:root[data-style="default"] {
+  --fm-glass-panel: rgba(255,255,255,.74);
+  --fm-glass-surface: rgba(255,255,255,.44);
+  --fm-glass-card: rgba(255,255,255,.78);
+  --fm-glass-field: rgba(255,255,255,.59);
+  --fm-glass-stroke: rgba(111,126,164,.20);
+  --fm-glass-highlight: rgba(255,255,255,.72);
+  --fm-glass-shadow: 0 18px 52px rgba(46,59,98,.15),0 3px 13px rgba(40,52,91,.05);
+  --fm-glass-card-shadow: 0 9px 30px rgba(42,59,105,.09),0 1px 2px rgba(42,59,105,.06);
+}
+:root.dark[data-style="default"] {
+  --fm-glass-panel: rgba(36,43,62,.76);
+  --fm-glass-surface: rgba(21,28,45,.58);
+  --fm-glass-card: rgba(44,51,72,.77);
+  --fm-glass-field: rgba(53,61,83,.65);
+  --fm-glass-stroke: rgba(189,203,232,.16);
+  --fm-glass-highlight: rgba(195,209,238,.09);
+  --fm-glass-shadow: 0 18px 54px rgba(0,0,0,.33),0 2px 12px rgba(0,0,0,.12);
+  --fm-glass-card-shadow: 0 10px 28px rgba(0,0,0,.20),0 1px 3px rgba(0,0,0,.10);
+}
+:root[data-style="default"] .app-shell {
+  padding: 12px;
+  gap: 12px;
+  background:
+    radial-gradient(ellipse 50% 65% at 83% 5%,color-mix(in srgb,var(--primary) 15%,transparent),transparent 76%),
+    radial-gradient(ellipse 46% 50% at 5% 95%,color-mix(in srgb,var(--primary) 7%,transparent),transparent 82%),
+    var(--background);
+}
+:root[data-style="default"] .sidebar {
+  border: 1px solid var(--fm-glass-stroke);
+  border-radius: 21px;
+  background: var(--fm-glass-panel);
+  box-shadow: var(--fm-glass-shadow),inset 0 1px var(--fm-glass-highlight);
+  backdrop-filter: blur(22px) saturate(135%);
+  -webkit-backdrop-filter: blur(22px) saturate(135%);
+}
+:root[data-style="default"] .brand {
+  border-bottom-color: var(--fm-glass-stroke);
+}
+:root[data-style="default"] .brandmark {
+  border-radius: 13px;
+  box-shadow: 0 7px 19px color-mix(in srgb,var(--primary) 28%,transparent);
+}
+:root[data-style="default"] .side-link {
+  border-radius: 11px;
+  margin-bottom: 3px;
+}
+:root[data-style="default"] .side-link:hover {
+  background: color-mix(in srgb,var(--primary) 9%,transparent);
+}
+:root[data-style="default"] .side-link.active {
+  background: color-mix(in srgb,var(--primary) 14%,var(--fm-glass-field));
+  color: var(--foreground);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb,var(--primary) 18%,transparent);
+}
+:root[data-style="default"] .work {
+  border-radius: 21px;
+  border: 1px solid var(--fm-glass-stroke);
+  background: var(--fm-glass-surface);
+  box-shadow: var(--fm-glass-shadow),inset 0 1px var(--fm-glass-highlight);
+  backdrop-filter: blur(19px) saturate(130%);
+  -webkit-backdrop-filter: blur(19px) saturate(130%);
+}
+:root[data-style="default"] .content {
+  background:
+    radial-gradient(ellipse 58% 38% at 98% 0%,color-mix(in srgb,var(--primary) 8%,transparent),transparent 90%) !important;
+  padding: 29px clamp(16px,3.1vw,43px);
+}
+:root[data-style="default"] .page-title {
+  letter-spacing: -.045em;
+  font-weight: 760;
+}
+:root[data-style="default"] .content [data-slot="card"],
+:root[data-style="default"] .content .record-card,
+:root[data-style="default"] .content .work-card,
+:root[data-style="default"] .content .memo-note,
+:root[data-style="default"] .editor-grid > div.rounded-xl {
+  background: var(--fm-glass-card);
+  border: 1px solid var(--fm-glass-stroke);
+  border-radius: 17px;
+  box-shadow: var(--fm-glass-card-shadow),inset 0 1px var(--fm-glass-highlight);
+  backdrop-filter: blur(12px) saturate(125%);
+  -webkit-backdrop-filter: blur(12px) saturate(125%);
+}
+:root[data-style="default"] .record-card:hover,
+:root[data-style="default"] .memo-note:hover {
+  box-shadow: 0 12px 32px color-mix(in srgb,var(--primary) 13%,transparent);
+  border-color: color-mix(in srgb,var(--primary) 26%,var(--fm-glass-stroke));
+}
+:root[data-style="default"] [data-slot="input"],
+:root[data-style="default"] [data-slot="textarea"],
+:root[data-style="default"] [data-slot="select-trigger"],
+:root[data-style="default"] .content input,
+:root[data-style="default"] .content textarea {
+  background: var(--fm-glass-field);
+  border-color: var(--fm-glass-stroke);
+  box-shadow: inset 0 1px 1px rgba(10,24,51,.025);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+}
+:root[data-style="default"] [data-slot="dialog-content"],
+:root[data-style="default"] [data-slot="select-content"],
+:root[data-style="default"] .gate {
+  background: var(--fm-glass-panel);
+  border: 1px solid var(--fm-glass-stroke);
+  border-radius: 19px;
+  box-shadow: 0 25px 80px rgba(15,24,46,.24),inset 0 1px var(--fm-glass-highlight);
+  backdrop-filter: blur(28px) saturate(145%);
+  -webkit-backdrop-filter: blur(28px) saturate(145%);
+}
+:root[data-style="default"] .overlay {
+  background: color-mix(in srgb,var(--background) 60%,rgba(14,21,44,.58));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+:root[data-style="default"] .status {
+  background: var(--fm-glass-panel);
+  border-color: var(--fm-glass-stroke);
+  box-shadow: 0 5px 20px rgba(34,49,77,.10);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+:root[data-style="default"] .filterbar [data-slot="button"] {
+  border-radius: 11px;
+}
+@media(max-width:660px) {
+  :root[data-style="default"] .app-shell {padding: 6px;gap: 6px;}
+  :root[data-style="default"] .sidebar,
+  :root[data-style="default"] .work {border-radius: 15px;}
+  :root[data-style="default"] .content {padding: 17px;}
+}
+@media(prefers-reduced-transparency:reduce) {
+  :root[data-style="default"] .sidebar,
+  :root[data-style="default"] .work,
+  :root[data-style="default"] .content [data-slot="card"] {backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--card);}
+}

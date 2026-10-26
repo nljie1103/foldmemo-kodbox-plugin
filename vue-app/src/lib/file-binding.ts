@@ -1,0 +1,14 @@
+/** Browser file handle storage. Importing a vault never restores a handle from another vault. */
+import {digestPackage} from './security-v2'
+export interface FileBinding {handle:FileSystemFileHandle;vaultId:string;baseline:string;sourceUrl:string}
+const NAME='foldmemo-v2-bindings'
+function database():Promise<IDBDatabase>{return new Promise((resolve,reject)=>{const r=indexedDB.open(NAME,1);r.onupgradeneeded=()=>r.result.createObjectStore('binding');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
+export async function saveBinding(binding:FileBinding){const db=await database();try{await new Promise<void>((resolve,reject)=>{const r=db.transaction('binding','readwrite').objectStore('binding').put(binding,binding.sourceUrl);r.onsuccess=()=>resolve();r.onerror=()=>reject(r.error)})}finally{db.close()}}
+export async function forgetBinding(url:string){const db=await database();try{await new Promise<void>((resolve,reject)=>{const r=db.transaction('binding','readwrite').objectStore('binding').delete(url);r.onsuccess=()=>resolve();r.onerror=()=>reject(r.error)})}finally{db.close()}}
+export async function loadBinding(url:string):Promise<FileBinding|null>{const db=await database();try{return await new Promise((resolve,reject)=>{const r=db.transaction('binding','readonly').objectStore('binding').get(url);r.onsuccess=()=>resolve(r.result||null);r.onerror=()=>reject(r.error)})}finally{db.close()}}
+export function readEmbedded(text:string):unknown|null {const doc=new DOMParser().parseFromString(text,'text/html');const slot=doc.getElementById('foldmemo-embedded');if(!slot)throw Error('选中文件缺少 FoldMemo 标识');const value=slot.textContent?.trim();if(!value||value==='null')return null;try{return JSON.parse(value)}catch{throw Error('文件内保险库数据损坏，禁止覆盖')}}
+export async function inspectBinding(binding:FileBinding,currentId:string){if(binding.vaultId!==currentId||binding.sourceUrl!==location.href)throw Error('绑定的保险库身份不同');const f=await binding.handle.getFile();const text=await f.text();if(sourceShape(text)!==sourceShape((window as Window & {__FOLDMEMO_TEMPLATE__?:string}).__FOLDMEMO_TEMPLATE__||''))throw Error('目标 HTML 源码不同，禁止覆盖');const data=readEmbedded(text);const id=(data as {vaultId?:string;plain?:{id?:string}}|null)?.vaultId || (data as {plain?:{id?:string}}|null)?.plain?.id;
+if(data&&id!==currentId)throw Error('磁盘文件保险库 ID 不匹配，禁止写入');const hash=await digestPackage(data);if(hash!==binding.baseline)throw Error('磁盘文件已被其他程序修改，必须重新核实，禁止覆盖');return true}
+
+/** Verify that a selected file is the same app build, not merely the same filename. */
+export function sourceShape(html:string){const doc=new DOMParser().parseFromString(html,'text/html');const slot=doc.getElementById('foldmemo-embedded');if(!slot)throw Error('文件缺少保险库标识');slot.textContent='null';return doc.documentElement.outerHTML}

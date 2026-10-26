@@ -1,0 +1,51 @@
+/* v2.0.1 reference: Daniel Rozhnov / Practic Note Desk 1440.
+   Reproduction of visual system; original design supplies no open-source web UI. */
+:root[data-style="minimal"]{--background:#fff;--foreground:#373737;--card:#fff;--card-foreground:#373737;--popover:#fff;--popover-foreground:#373737;--secondary:#f8f8f8;--muted:#f8f8f8;--muted-foreground:#a8a9ae;--accent:#efeffe;--accent-foreground:#5d57fc;--border:#ececef;--input:#e7e7eb;--sidebar:#f2f2f2;--sidebar-foreground:#464646;--sidebar-accent:#ededff;--sidebar-accent-foreground:#5d57fc;--sidebar-border:#e9e9eb;--radius:10px}
+:root[data-style="minimal"] .app-shell{background:#fff;font-size:12px;overflow:hidden}
+:root[data-style="minimal"] .nd-shell .sidebar{width:67px;border:0;border-right:1px solid #e8e8e9;padding:10px 7px 13px;border-radius:0;background:#f2f2f2;box-shadow:none}
+:root[data-style="minimal"] .nd-shell .sidebar.expanded:not(.collapsed){width:254px}
+:root[data-style="minimal"] .nd-shell .brand{height:55px;min-height:55px;padding:5px 8px 11px;gap:9px}
+:root[data-style="minimal"] .nd-shell .brandmark{background:#171719;color:white;width:33px;height:33px;border-radius:8px;font-style:italic;letter-spacing:-.09em;font-weight:900;font-size:23px}
+:root[data-style="minimal"] .brand .side-label strong{font-size:17px;font-weight:750;letter-spacing:-.07em}
+:root[data-style="minimal"] .brand .side-label div{display:none}
+:root[data-style="minimal"] .nd-sidebar-search{background:#f8f8f8;margin:0 2px 8px;border:1px solid #dedee0;height:36px;border-radius:10px}
+:root[data-style="minimal"] .nd-quick-grid{padding:0 2px;margin:0 0 10px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+:root[data-style="minimal"] .nd-quick-grid button{min-height:68px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;background:#fff;color:#252529;border-radius:10px;border:1px solid transparent;font-size:11px;font-weight:600;transition:background .14s ease}
+:root[data-style="minimal"] .nd-quick-grid button:hover{border-color:#d8d6ff;background:#f6f5ff}
+:root[data-style="minimal"] .nd-quick-grid button.active{background:#5d57fc;color:#fff;border-color:#5d57fc}
+:root[data-style="minimal"] .nd-side-section{padding:8px 9px 5px;color:#373737;font-size:11px;font-weight:750}
+:root[data-style="minimal"] .sidebar-nav{padding:0 1px;gap:1px}
+:root[data-style="minimal"] .side-link{height:32px;min-height:32px;font-size:11px;font-weight:520;border-radius:7px;padding:0 8px;color:#45454a;gap:10px}
+:root[data-style="minimal"] .side-link svg{width:15px;height:15px}
+:root[data-style="minimal"] .side-link.active{color:#4b46e8;background:#e6e4ff}
+:root[data-style="minimal"] .nd-sidebar-bottom{padding:7px 1px 0}
+:root[data-style="minimal"] .nd-profile{border:0;border-top:1px solid #e4e4e6;padding:9px 5px 0;margin-top:7px}
+:root[data-style="minimal"] .nd-avatar{width:30px;height:30px;border-radius:8px;background:#d9d6ff;color:#5048d8}
+:root[data-style="minimal"] .work{background:#fff}
+:root[data-style="minimal"] .work .nd-content{padding:16px 14px 30px;background:#fff}
+:root[data-style="minimal"] .work:has(.memo-board) .nd-content{padding:0}
+:root[data-style="minimal"] .work:has(.memo-board) .nd-content .section:has(.memo-board){gap:0}
+:root[data-style="minimal"] .work:has(.memo-board) .content-top{padding:15px 16px 3px;margin:0}
+:root[data-style="minimal"] .work:has(.memo-board) .content-top .page-title{font-size:17px;letter-spacing:-.035em}
+:root[data-style="minimal"] .work:has(.memo-board) .filterbar{padding:9px 16px 8px;margin:0}
+:root[data-style="minimal"] .work:has(.memo-board) .nd-content-tools{padding:0 16px 10px;margin:0}
+:root[data-style="minimal"] .memo-board{width:100%;border:0;border-top:1px solid #ececef;border-radius:0;box-shadow:none;min-height:calc(100dvh - 165px);grid-template-columns:repeat(3,minmax(0,1fr));gap:0}
+:root[data-style="minimal"] .memo-column{padding:15px 14px;background:#fff;border-right:1px solid #efeff0}
+:root[data-style="minimal"] .memo-column:last-child{border-right:0}
+:root[data-style="minimal"] .nd-note{border:1px solid #e7e7e8;border-radius:11px;padding:10px 10px 8px;background:#fff;box-shadow:0 3px 13px rgba(37,37,37,.05);font-size:11px;min-height:55px;color:#262629;transition:border-color .15s ease,box-shadow .15s ease}
+:root[data-style="minimal"] .nd-note strong{font-size:11px;font-weight:550;line-height:1.32}
+:root[data-style="minimal"] .nd-note:hover,:root[data-style="minimal"] .nd-note:focus-visible{border-color:#8984ff;background:#f8f7ff}
+:root[data-style="minimal"] .nd-note:active{background:#5d57fc;color:#fff}
+:root[data-style="minimal"] .nd-note-preview{font-size:10px;line-height:1.35;color:#6d6d72;-webkit-line-clamp:2;max-height:40px}
+:root[data-style="minimal"] .nd-note-bottom{font-size:9px;color:#9b9ba0;margin-top:7px}
+:root[data-style="minimal"] .nd-note-icons{color:#999}
+:root[data-style="minimal"] .note-sort-handle{color:#acacb1}
+:root[data-style="minimal"] .work>.toolbar-tab{height:49px;background:#f2f2f2;border-bottom:1px solid #eaeaea;padding:8px 12px 0}
+:root[data-style="minimal"] .editor-tab{height:41px;min-width:145px;background:#5d57fc;color:white;border-radius:9px 9px 0 0;padding:6px 11px}
+:root[data-style="minimal"] .work .editor-grid{max-width:920px}
+:root[data-style="minimal"] .sidebar-theme-group{border-top:1px solid #e4e4e5;padding-top:5px}
+:root[data-style="minimal"] [data-slot="card"],:root[data-style="minimal"] [data-slot="dialog-content"],:root[data-style="minimal"] [data-slot="popover-content"]{box-shadow:none;background:var(--card);border:1px solid var(--border)}
+:root[data-style="minimal"] [data-slot="button"]{border-radius:8px}
+:root[data-style="minimal"] [data-slot="input"],:root[data-style="minimal"] [data-slot="textarea"],:root[data-style="minimal"] [data-slot="select-trigger"]{background:#fff;border-radius:8px;box-shadow:none}
+@media(max-width:1000px){:root[data-style="minimal"] .memo-board{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:680px){:root[data-style="minimal"] .memo-board{grid-template-columns:1fr}:root[data-style="minimal"] .memo-column{border-right:0;border-bottom:1px solid var(--border)}:root[data-style="minimal"] .work:has(.memo-board) .content-top{padding:12px 12px 4px}:root[data-style="minimal"] .nd-shell .sidebar.expanded:not(.collapsed){width:min(254px,82vw);position:absolute;z-index:60;height:100dvh}}

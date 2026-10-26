@@ -1,0 +1,1 @@
+执行 cd vue-app && npm install && npm run build:kodbox，生成 index.html 和 assets/*.js、assets/*.css，然后安装整个 plugins/foldMemo 目录。

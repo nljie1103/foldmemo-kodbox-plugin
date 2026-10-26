@@ -1,0 +1,21 @@
+import assert from 'node:assert/strict';
+import {performance} from 'node:perf_hooks';
+import {newVault,validate,pack,unpack} from './src/lib/vault.ts';
+import {createSession,sealPackage,openPackage,resetOpenPassword,digestPackage} from './src/lib/security-v2.ts';
+async function rejects(fn,label){await assert.rejects(fn,undefined,label)}
+const vault=newVault();const cat={id:'c1',name:'服务器',fields:[{id:'u',name:'账号',type:'text'},{id:'p',name:'密码',type:'password'}]};vault.categories=[cat];
+for(let i=0;i<200;i++)vault.items.push({id:'item-'+i,title:'记录'+i,kind:'record',categoryId:'c1',body:'',values:{u:'admin',p:'SECRET-TEST-'+i},favorite:false,order:i,updated:1});
+const session=await createSession(vault.id,'open-password-123');
+let sealed=await sealPackage(vault,session);assert(!JSON.stringify(sealed).includes('SECRET-TEST-'));assert.equal(sealed.format,'foldmemo-file-2');
+const recovered=await openPackage(sealed,'open-password-123',validate);assert.equal(recovered.vault.items.length,200);
+await rejects(()=>openPackage(sealed,'wrong-password',validate),'wrong password');
+const tampered=structuredClone(sealed);tampered.content.payload=tampered.content.payload.slice(0,-4)+'AAAA';await rejects(()=>openPackage(tampered,'open-password-123',validate),'tampered data');
+const other=structuredClone(sealed);other.vaultId='another';await rejects(()=>openPackage(other,'open-password-123',validate),'identity mismatch');
+const rotated=await resetOpenPassword(vault.id,recovered.session,'new-opening-pass');sealed=await sealPackage(vault,rotated);assert.equal((await openPackage(sealed,'new-opening-pass',validate)).vault.items.length,200);await rejects(()=>openPackage(sealed,'open-password-123',validate),'old password must fail');
+const clear=await sealPackage(vault,await resetOpenPassword(vault.id,rotated,null));assert.equal(clear.encrypted,false);assert.equal((await openPackage(clear,null,validate)).vault.items.length,200);
+const backup=await pack(vault,'storage-password-1');assert.equal((await unpack(backup,'storage-password-1')).items.length,200);
+await rejects(()=>unpack(backup,'wrong',),'backup wrong password');
+const same=await digestPackage(clear), changed=await digestPackage(sealed);assert.notEqual(same,changed);
+const bad=structuredClone(vault);bad.items[1].id=bad.items[0].id;assert.throws(()=>validate(bad),'duplicate record');
+const del=structuredClone(vault);del.trash=[{item:del.items.pop(),deletedAt:Date.now()}];assert.equal(validate(del).trash.length,1);
+const st=performance.now();for(let j=0;j<100;j++){const p=await sealPackage(vault,rotated);assert.equal(p.vaultId,vault.id)}console.log('PASS: 加解密、密码修改、篡改/身份拒绝、备份、校验、100次保存',Math.round(performance.now()-st)+'ms');

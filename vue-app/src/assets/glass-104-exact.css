@@ -1,0 +1,60 @@
+/* FoldMemo v2.0.1 — visual reference: exact v1.0.4 default tokens and geometry.
+   Different Vue DOM requires scoped selectors but no global theme bleed. */
+:root[data-style="default"] {
+  --background:#f2f3f9;--foreground:#232b40;--muted-foreground:#7c8499;
+  --card:rgba(255,255,255,.83);--card-foreground:#232b40;
+  --popover:rgba(255,255,255,.96);--popover-foreground:#232b40;
+  --secondary:rgba(255,255,255,.44);--secondary-foreground:#232b40;
+  --muted:rgba(255,255,255,.44);--accent:rgba(103,90,244,.09);--accent-foreground:#675af4;
+  --border:rgba(105,118,151,.17);--input:rgba(105,118,151,.17);
+  --sidebar:rgba(255,255,255,.76);--sidebar-foreground:#7c8499;--sidebar-accent:rgba(255,255,255,.44);
+  --sidebar-accent-foreground:#675af4;--sidebar-border:rgba(105,118,151,.17);
+  --fm-glass-panel:rgba(255,255,255,.76);--fm-glass-surface:rgba(255,255,255,.44);
+  --fm-glass-card:rgba(255,255,255,.83);--fm-glass-field:rgba(255,255,255,.76);
+  --fm-glass-stroke:rgba(105,118,151,.17);--fm-glass-shadow:0 16px 45px rgba(48,62,98,.125);
+  --fm-glass-card-shadow:0 3px 12px rgba(15,23,42,.04);--fm-glass-highlight:rgba(255,255,255,.55);
+  --radius:11px;--primary:#675af4;--primary-foreground:#fff;
+}
+:root.dark[data-style="default"] {
+  --background:#141926;--foreground:#e9edf8;--muted-foreground:#a8b2c8;
+  --card:rgba(43,50,71,.83);--card-foreground:#e9edf8;
+  --popover:rgba(36,43,61,.97);--popover-foreground:#e9edf8;
+  --secondary:rgba(33,40,58,.66);--secondary-foreground:#e9edf8;
+  --muted:rgba(33,40,58,.66);--accent:rgba(133,119,255,.15);--accent-foreground:#ad9fff;
+  --border:rgba(175,187,211,.17);--input:rgba(175,187,211,.17);
+  --sidebar:rgba(36,43,61,.78);--sidebar-foreground:#a8b2c8;--sidebar-accent:rgba(33,40,58,.66);
+  --sidebar-accent-foreground:#ad9fff;--sidebar-border:rgba(175,187,211,.17);
+  --fm-glass-panel:rgba(36,43,61,.78);--fm-glass-surface:rgba(33,40,58,.66);
+  --fm-glass-card:rgba(43,50,71,.83);--fm-glass-field:rgba(36,43,61,.78);
+  --fm-glass-stroke:rgba(175,187,211,.17);--fm-glass-shadow:0 15px 46px rgba(0,0,0,.27);
+  --fm-glass-card-shadow:0 3px 12px rgba(0,0,0,.12);--fm-glass-highlight:rgba(255,255,255,.06);
+}
+:root[data-style="default"] .app-shell {padding:11px;gap:11px;min-height:490px;background:radial-gradient(circle at 86% 0%,color-mix(in srgb,var(--primary) 11%,transparent),transparent 37%),var(--background);}
+:root[data-style="default"] .sidebar {width:70px;border-radius:21px;padding:13px 10px;transition:width .2s ease;background:var(--fm-glass-panel);box-shadow:var(--fm-glass-shadow);border:1px solid var(--fm-glass-stroke);backdrop-filter:blur(17px);-webkit-backdrop-filter:blur(17px)}
+:root[data-style="default"] .sidebar.expanded:not(.collapsed){width:236px}
+:root[data-style="default"] .brand {padding:5px 5px 15px;border:0;gap:12px;min-height:65px}
+:root[data-style="default"] .brandmark {width:43px;height:43px;border-radius:14px;font-size:24px;box-shadow:none}
+:root[data-style="default"] .sidebar-nav {padding:7px 0;gap:4px}
+:root[data-style="default"] .side-link {min-height:43px;height:43px;padding:10px 12px;border-radius:12px;color:var(--muted-foreground);font-size:13px;font-weight:650;gap:13px;box-shadow:none!important}
+:root[data-style="default"] .side-link.active{background:var(--fm-glass-surface);color:var(--primary);box-shadow:inset 3px 0 var(--primary)!important;border:0}
+:root[data-style="default"] .side-link:hover{background:var(--fm-glass-surface)}
+:root[data-style="default"] .work {background:var(--fm-glass-surface);border:0;border-radius:20px;box-shadow:none;backdrop-filter:blur(17px);-webkit-backdrop-filter:blur(17px)}
+:root[data-style="default"] .content {padding:28px!important;background:transparent!important}
+:root[data-style="default"] .page-title {font-size:25px;font-weight:800;letter-spacing:-.6px}
+:root[data-style="default"] .subhead{font-size:12px;margin-top:5px}
+:root[data-style="default"] .section{gap:13px}
+:root[data-style="default"] .content [data-slot="card"]{border-radius:17px;background:var(--fm-glass-panel);border:1px solid var(--fm-glass-stroke);box-shadow:none;backdrop-filter:blur(17px);-webkit-backdrop-filter:blur(17px)}
+:root[data-style="default"] .content .record-card {background:var(--fm-glass-card);border-radius:14px;box-shadow:none}
+:root[data-style="default"] .record-card:hover {box-shadow:0 3px 12px rgba(15,23,42,.06)}
+:root[data-style="default"] [data-slot="button"]{border-radius:11px;font-weight:650}
+:root[data-style="default"] [data-slot="input"],:root[data-style="default"] [data-slot="textarea"],:root[data-style="default"] [data-slot="select-trigger"] {background:var(--fm-glass-field);border:1px solid var(--fm-glass-stroke);border-radius:11px;backdrop-filter:blur(8px)}
+:root[data-style="default"] [data-slot="dialog-content"]{background:var(--background);border:1px solid var(--fm-glass-stroke);border-radius:21px;box-shadow:var(--fm-glass-shadow);backdrop-filter:blur(17px)}
+:root[data-style="default"] .status{left:85px;right:auto;bottom:16px;background:var(--fm-glass-panel);border:1px solid var(--fm-glass-stroke);border-radius:10px;color:var(--muted-foreground);box-shadow:none;max-width:min(72vw,520px)}
+:root[data-style="default"] .sidebar.expanded~.work .status{left:255px}
+:root[data-style="default"] .sidebar-theme-group{border-top:1px solid var(--fm-glass-stroke)}
+@media(max-width:800px){:root[data-style="default"] .app-shell{padding:6px;gap:6px}:root[data-style="default"] .sidebar{width:58px;padding:10px 5px}:root[data-style="default"] .sidebar.expanded:not(.collapsed){width:195px}:root[data-style="default"] .content{padding:17px!important}:root[data-style="default"] .status{left:67px}}
+@media(max-width:540px){:root[data-style="default"] .sidebar.expanded:not(.collapsed){position:absolute;left:6px;top:6px;bottom:6px;z-index:60}:root[data-style="default"] .status{left:67px;bottom:10px;max-width:calc(100vw - 82px)}}
+
+:root[data-style="default"][data-accent="blue"]{--primary:#277cdc;--background:#f0f5fb;--sidebar:rgba(245,250,255,.78)}
+:root[data-style="default"][data-accent="green"]{--primary:#159f74;--background:#f1f7f5;--sidebar:rgba(246,252,249,.78)}
+:root[data-style="default"][data-accent="rose"]{--primary:#dc5387;--background:#fbf3f7;--sidebar:rgba(255,248,251,.78)}

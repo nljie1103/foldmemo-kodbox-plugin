@@ -1,0 +1,7 @@
+node_modules/
+dist/
+*.vault.json
+*.backup.json
+*.secret.json
+*.local.html
+.env*

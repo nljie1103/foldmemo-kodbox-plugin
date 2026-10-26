@@ -1,0 +1,235 @@
+/* Note Desk 原生视觉层 —— 和毛玻璃默认风格完全隔离。
+   在 Vue 3 组件结构上复刻 Note Desk 的平面工作台语言，不声称使用原作者源码。
+   本文件后于 Tailwind/shadcn 主题载入，因此也覆盖 portal 中的 Dialog/Select。 */
+:root[data-style="minimal"] {
+  color-scheme: light;
+  --radius: .65rem;
+  --background: #ffffff;
+  --foreground: #29292d;
+  --card: #ffffff;
+  --card-foreground: #29292d;
+  --popover: #ffffff;
+  --popover-foreground: #29292d;
+  --secondary: #f3f3f4;
+  --secondary-foreground: #303038;
+  --muted: #f4f4f5;
+  --muted-foreground: #83858d;
+  --accent: #ededf9;
+  --accent-foreground: #4c44c9;
+  --border: #e9e9ed;
+  --input: #e3e3e8;
+  --ring: var(--primary);
+  --sidebar: #f4f4f5;
+  --sidebar-foreground: #34343a;
+  --sidebar-accent: #ededfb;
+  --sidebar-accent-foreground: #4a44cc;
+  --sidebar-border: #e5e5e8;
+}
+:root.dark[data-style="minimal"] {
+  color-scheme: dark;
+  --background: #17181d;
+  --foreground: #f5f5f7;
+  --card: #23242b;
+  --card-foreground: #f5f5f7;
+  --popover: #26272e;
+  --popover-foreground: #f5f5f7;
+  --secondary: #2b2c35;
+  --secondary-foreground: #ededf2;
+  --muted: #30313b;
+  --muted-foreground: #abadb8;
+  --accent: #333153;
+  --accent-foreground: #e5e2ff;
+  --border: #363742;
+  --input: #41424d;
+  --sidebar: #202127;
+  --sidebar-foreground: #ededf2;
+  --sidebar-accent: #383454;
+  --sidebar-accent-foreground: #ece9ff;
+  --sidebar-border: #353640;
+}
+/* no glass: ALL app & teleported shadcn/reka primitives */
+:root[data-style="minimal"] *,
+:root[data-style="minimal"] *::before,
+:root[data-style="minimal"] *::after {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background-image: none !important;
+}
+:root[data-style="minimal"] .app-shell.nd-shell {
+  background: var(--background);
+  width: 100%; height: 100dvh;
+  overflow: hidden;
+  font-size: 13px;
+}
+:root[data-style="minimal"] .nd-shell .sidebar {
+  width: 268px;
+  background: var(--sidebar);
+  border-right: 1px solid var(--sidebar-border);
+  box-shadow: none;
+}
+:root[data-style="minimal"] .nd-shell .sidebar.collapsed { width: 66px; }
+:root[data-style="minimal"] .nd-shell .brand {
+  border: 0;
+  min-height: 64px;
+  padding: 14px 15px 12px;
+  gap: 11px;
+}
+:root[data-style="minimal"] .nd-shell .brandmark {
+  width: 31px;height: 31px;border-radius: 8px;
+  font-size: 20px;
+  background: #5d57fc;color: #fff;
+  box-shadow: none;
+}
+:root[data-style="minimal"] .nd-shell .brand .side-label strong {font-size: 20px;letter-spacing: -.055em;font-weight: 750;}
+:root[data-style="minimal"] .nd-shell .brand .side-label div {font-size: 9px;letter-spacing: .12em;}
+:root[data-style="minimal"] .nd-sidebar-search {
+  margin: 3px 10px 0;
+  display:flex;align-items:center;gap:7px;
+  height:34px;padding:0 9px;
+  border:1px solid #dedee2;
+  border-radius:10px;
+  color:var(--muted-foreground);
+  background: transparent;
+}
+:root.dark[data-style="minimal"] .nd-sidebar-search {border-color:var(--input)}
+:root[data-style="minimal"] .nd-sidebar-search:focus-within {border-color:var(--primary);box-shadow:0 0 0 2px color-mix(in srgb,var(--primary) 12%,transparent)}
+:root[data-style="minimal"] .nd-sidebar-search input {background:none;outline:0;min-width:0;flex:1;border:0;font-size:12px;color:var(--foreground);}
+:root[data-style="minimal"] .nd-sidebar-search input::placeholder {color:var(--muted-foreground);}
+:root[data-style="minimal"] .nd-search-hint {font-size:10px;white-space:nowrap;color:var(--muted-foreground);}
+:root[data-style="minimal"] .nd-side-section {padding:19px 12px 8px;color:var(--muted-foreground);font-weight:600;letter-spacing:.01em;font-size:11px;}
+:root[data-style="minimal"] .sidebar-nav {padding:7px 9px;gap:4px;}
+:root[data-style="minimal"] .side-link {
+  height:39px;min-height:39px;
+  padding:0 12px;border:0;border-radius:8px;
+  background:transparent;color:var(--sidebar-foreground);
+  font-size:12px;font-weight:500;gap:11px;
+  transition:background .12s ease;
+}
+:root[data-style="minimal"] .side-link:hover {background:color-mix(in srgb,var(--primary) 7%,var(--sidebar));}
+:root[data-style="minimal"] .side-link.active {background:var(--primary);color:white;font-weight:600;}
+:root[data-style="minimal"] .nd-sidebar-bottom {padding:12px 9px 14px;margin-top:auto;}
+:root[data-style="minimal"] .nd-profile {
+  display:flex;align-items:center;gap:10px;padding:10px 9px 5px;
+  margin-top:12px;border-top:1px solid var(--sidebar-border);
+}
+:root[data-style="minimal"] .nd-avatar {width:34px;height:34px;flex-shrink:0;border-radius:9px;display:grid;place-items:center;background:#dad9ed;color:#4b45d6;font-weight:900;}
+:root[data-style="minimal"] .nd-profile-copy {min-width:0;display:grid;gap:2px;}
+:root[data-style="minimal"] .nd-profile-copy strong {font-size:12px;}
+:root[data-style="minimal"] .nd-profile-copy span {font-size:10px;color:var(--muted-foreground);}
+:root[data-style="minimal"] .work {background:var(--background);}
+:root[data-style="minimal"] .work .nd-content {
+  background:var(--background);padding:22px 21px 32px;
+}
+:root[data-style="minimal"] .section {gap:15px;}
+:root[data-style="minimal"] .page-title {font-size:20px;letter-spacing:-.035em;font-weight:690;}
+:root[data-style="minimal"] .subhead {font-size:11px;color:var(--muted-foreground);margin-top:2px;}
+:root[data-style="minimal"] .content-top {margin-bottom:8px;gap:10px;}
+/* tabs look like Chrome tabs only while editor is open */
+:root[data-style="minimal"] .work > .toolbar-tab {
+  background:var(--sidebar);height:44px;border-bottom:0;gap:7px;padding:6px 14px 0;
+}
+:root[data-style="minimal"] .editor-tab {
+  height:38px;min-width:165px;max-width:270px;overflow:hidden;text-overflow:ellipsis;
+  background:var(--primary);border:0;color:#fff;border-radius:10px 10px 0 0;
+  padding:5px 13px;text-align:left;
+}
+:root[data-style="minimal"] .filterbar {
+  background:transparent;border:0;margin:0;padding:5px 0 11px;gap:6px;
+  scrollbar-width:thin;
+}
+:root[data-style="minimal"] .filterbar button {
+  height:32px;font-size:11px;border-radius:9px;
+  background:var(--card);border:1px solid var(--border);box-shadow:0 1px 2px #00000006;
+  color:var(--foreground);
+}
+:root[data-style="minimal"] .filterbar button:hover {border-color:var(--primary);}
+:root[data-style="minimal"] .filterbar button.bg-primary,
+:root[data-style="minimal"] .filterbar button[data-state="active"] {
+  background:var(--primary);color:#fff;border-color:var(--primary);
+}
+:root[data-style="minimal"] .nd-content-tools {display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:2px;color:var(--muted-foreground);font-size:11px;}
+:root[data-style="minimal"] .nd-view-picker {display:flex;gap:2px;background:var(--secondary);border:1px solid var(--border);padding:2px;border-radius:9px;}
+:root[data-style="minimal"] .nd-view-picker button {border:0;border-radius:6px;padding:5px 12px;font-size:11px;color:var(--muted-foreground);}
+:root[data-style="minimal"] .nd-view-picker button.active {background:var(--card);color:var(--foreground);box-shadow:0 1px 3px #00000010;}
+/* The central workspace is a full-width, flat white board, not a glass card. */
+:root[data-style="minimal"] .memo-board {
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  min-height:max(540px,calc(100dvh - 218px));
+  border:1px solid var(--border);border-radius:12px;
+  background:var(--card);overflow:hidden;gap:0;
+  box-shadow:none;
+}
+:root[data-style="minimal"] .memo-column {padding:15px 12px;min-width:0;border-right:1px solid var(--border);background:var(--card);}
+:root[data-style="minimal"] .memo-column:last-child {border-right:0;}
+:root[data-style="minimal"] .nd-note {
+  display:block;width:100%;height:auto;text-align:left;
+  border:1px solid #ededf0;border-radius:10px;
+  padding:11px 11px 7px;margin:0 0 8px;
+  background:var(--card);color:var(--foreground);
+  box-shadow:0 2px 9px #17171d0a;
+  transition:border-color .12s ease,box-shadow .12s ease;
+}
+:root.dark[data-style="minimal"] .nd-note {border-color:var(--border);box-shadow:0 1px 6px #00000020;}
+:root[data-style="minimal"] .nd-note:hover,
+:root[data-style="minimal"] .nd-note:focus-visible {border-color:color-mix(in srgb,var(--primary) 40%,var(--border));box-shadow:0 4px 14px #211f4320;outline:0;}
+:root[data-style="minimal"] .nd-note:active {background:color-mix(in srgb,var(--primary) 5%,var(--card));}
+:root[data-style="minimal"] .nd-note-top {display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+:root[data-style="minimal"] .nd-note-top strong {font-size:11.5px;line-height:1.45;letter-spacing:-.01em;font-weight:620;word-break:break-word;}
+:root[data-style="minimal"] .nd-ellipsis {font-size:16px;color:var(--muted-foreground);line-height:10px;letter-spacing:2px;flex-shrink:0;}
+:root[data-style="minimal"] .nd-note-preview {display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-wrap;margin-top:5px;color:var(--muted-foreground);font-size:10.5px;line-height:1.45;word-break:break-word;}
+:root[data-style="minimal"] .nd-note-bottom {display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:7px;color:var(--muted-foreground);font-size:10px;}
+:root[data-style="minimal"] .nd-note-icons {display:flex;align-items:center;color:var(--muted-foreground);}
+/* All non-board surfaces including gate, settings, forms, popovers and modal dialogs. */
+:root[data-style="minimal"] .work-card,
+:root[data-style="minimal"] .record-card,
+:root[data-style="minimal"] .editor-grid [data-slot="card"],
+:root[data-style="minimal"] .gate,
+:root[data-style="minimal"] .nd-dialog,
+:root[data-style="minimal"] [role="dialog"],
+:root[data-style="minimal"] [role="listbox"] {
+  background:var(--card)!important;
+  color:var(--card-foreground);border:1px solid var(--border)!important;
+  box-shadow:0 2px 10px #0000000b!important;
+  border-radius:11px!important;
+}
+:root[data-style="minimal"] .record-card:hover {box-shadow:0 3px 12px #00000012!important;transform:none;}
+:root[data-style="minimal"] input:not([type="checkbox"]):not([type="radio"]),
+:root[data-style="minimal"] textarea,
+:root[data-style="minimal"] [role="combobox"] {
+  box-shadow:none!important;
+  border-color:var(--input)!important;
+  background:var(--card)!important;
+  border-radius:8px!important;
+  outline-offset:1px;
+}
+:root[data-style="minimal"] .nd-sidebar-search input {background:transparent!important;border:0!important;}
+:root[data-style="minimal"] [role="dialog"] [data-slot="dialog-overlay"] {backdrop-filter:none!important;}
+:root[data-style="minimal"] [data-slot="dialog-overlay"] {background:rgba(0,0,0,.38)!important;backdrop-filter:none!important;}
+:root[data-style="minimal"] .overlay {background:rgba(244,244,245,.96);}
+:root.dark[data-style="minimal"] .overlay {background:rgba(14,15,19,.95);}
+:root[data-style="minimal"] .status {background:var(--card);border:1px solid var(--border);border-radius:9px;box-shadow:0 2px 10px #00000012;}
+:root[data-style="minimal"] .fieldline {border-color:var(--border);}
+:root[data-style="minimal"] .editor-grid {max-width:780px;}
+:root[data-style="minimal"] .setting-line {border-color:var(--border);}
+:root[data-style="minimal"] .swatch {box-shadow:none;}
+@media(max-width:1050px) {
+ :root[data-style="minimal"] .memo-board {grid-template-columns:repeat(2,minmax(0,1fr));}
+ :root[data-style="minimal"] .memo-column:nth-child(2) {border-right:0;}
+ :root[data-style="minimal"] .memo-column:nth-child(3) {grid-column:1/-1;border-top:1px solid var(--border);border-right:0;}
+}
+@media(max-width:680px) {
+ :root[data-style="minimal"] .nd-shell .sidebar {width:66px;}
+ :root[data-style="minimal"] .nd-shell .sidebar.expanded:not(.collapsed) {width:min(268px,86vw);position:absolute;z-index:40;inset:0 auto 0 0;box-shadow:12px 0 38px #00000021;}
+ :root[data-style="minimal"] .memo-board {display:block;min-height:350px;}
+ :root[data-style="minimal"] .memo-column {width:100%;min-height:0;border:0!important;border-bottom:1px solid var(--border)!important;padding:12px;}
+ :root[data-style="minimal"] .memo-column:last-child {border-bottom:0!important;}
+ :root[data-style="minimal"] .work .nd-content {padding:14px 12px 22px;}
+ :root[data-style="minimal"] .page-title {font-size:18px;}
+ :root[data-style="minimal"] .nd-content-tools {align-items:flex-start;}
+}
+@media(prefers-reduced-motion:reduce) {
+ :root[data-style="minimal"] * {transition:none!important;animation:none!important;}
+}
+
+/* Independent accessible handles for long press + keyboard reorder */
+.note-drag-wrap{position:relative}.note-sort-handle{position:absolute;z-index:5;right:6px;top:5px;display:grid;place-items:center;width:24px;height:26px;background:transparent;border:0;border-radius:5px;color:#889098;touch-action:none;cursor:grab}.note-sort-handle:hover,.note-sort-handle:focus-visible{background:#f1f0ff;color:#5d57fc;outline:2px solid #c4bffc}.drag-keyboard-handle{display:inline-flex;touch-action:none;cursor:grab;border-radius:4px}.drag-keyboard-handle:focus-visible{outline:2px solid var(--primary)}

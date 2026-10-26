@@ -1,0 +1,40 @@
+/* Dedicated System Theme sidebar page shared across styles. */
+.sidebar-theme-group{padding:8px 9px;border-top:1px solid var(--sidebar-border)}
+.sidebar-section-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;padding:4px 12px;color:var(--muted-foreground)}
+.sidebar-theme-link{width:100%}
+.theme-page{gap:15px}
+.theme-workspace{display:grid;grid-template-columns:210px minmax(0,1fr);min-height:500px;border:1px solid var(--border);border-radius:13px;background:var(--card);overflow:hidden}
+.theme-detail-sidebar{display:flex;flex-direction:column;gap:4px;padding:17px 10px;background:var(--secondary);border-right:1px solid var(--border)}
+.theme-detail-sidebar button{display:flex;align-items:center;gap:10px;min-height:40px;width:100%;padding:10px 12px;border-radius:9px;text-align:left;color:var(--muted-foreground);font-size:12px;font-weight:600;transition:background .12s ease}
+.theme-detail-sidebar button:hover{color:var(--foreground);background:var(--accent)}
+.theme-detail-sidebar button.active{color:var(--foreground);background:var(--card);box-shadow:0 1px 3px rgba(20,20,35,.07)}
+.theme-detail-body{min-width:0;padding:25px clamp(15px,3vw,30px)}
+.theme-setting-panel{display:grid;align-content:start;gap:14px;max-width:870px}
+.theme-setting-panel h2{font-size:18px;font-weight:750;line-height:1.3}
+.theme-panel-hint{font-size:12px;color:var(--muted-foreground);line-height:1.7;margin:0}
+.theme-style-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:10px}
+.theme-style-option{display:flex;flex-direction:column;gap:7px;text-align:left;border:1px solid var(--border);border-radius:12px;padding:10px;min-width:0;background:var(--card)}
+.theme-style-option.selected{outline:2px solid var(--primary);outline-offset:1px}
+.theme-style-option:hover{background:color-mix(in srgb,var(--primary) 5%,var(--card))}
+.theme-style-option strong{font-size:13px;font-weight:750;padding-top:4px}
+.theme-style-option small{font-size:11px;line-height:1.55;color:var(--muted-foreground);min-height:36px}
+.theme-choice-indicator{font-size:11px;color:var(--primary);font-weight:700;padding:4px 0 2px}
+.theme-miniature{display:grid;grid-template-columns:26% 1fr 1fr;grid-template-rows:16% 1fr 1fr;border-radius:8px;height:118px;width:100%;overflow:hidden;gap:5px;padding:10px;background:#f2f3f9;border:1px solid rgba(95,99,112,.12)}
+.theme-miniature>*{border-radius:5px;background:white;border:1px solid #e9e9ef}
+.theme-miniature i{grid-row:1/-1;background:rgba(255,255,255,.77)}.theme-miniature b{grid-column:2/-1;background:#eeeafa}
+.theme-prev-minimal{background:#fff;gap:4px}.theme-prev-minimal i{background:#f2f2f2;border:0}.theme-prev-minimal b{background:#f2f2f2;border:0}
+.theme-prev-minimal em{border-radius:4px;border:1px solid #ececef;box-shadow:0 2px 4px #0000000d}
+.theme-prev-modern{background:#f7f8fa;gap:5px}.theme-prev-modern i{background:#fbfbfc;border-right:1px solid #e5e7eb}.theme-prev-modern b{background:#fff}
+.theme-mode-list{display:grid;gap:8px;margin-top:10px}
+.theme-mode-list button{display:flex;align-items:center;gap:14px;text-align:left;border:1px solid var(--border);border-radius:10px;padding:15px;background:var(--card);color:var(--foreground)}
+.theme-mode-list button.active{border-color:var(--primary);background:color-mix(in srgb,var(--primary) 5%,var(--card))}
+.theme-mode-list button>span{flex:1;display:grid;gap:3px}
+.theme-mode-list button strong{font-size:13px}
+.theme-mode-list button small{font-size:11px;color:var(--muted-foreground)}
+.theme-accent-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.theme-accent-options button{border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;gap:12px;text-align:left;padding:13px;background:var(--card)}
+.theme-accent-options button.active{border-color:var(--primary)}
+.theme-accent-options button>span{width:30px;height:30px;display:block;border-radius:8px;box-shadow:inset 0 0 0 2px #ffffff40}
+.theme-accent-options button strong{flex:1;font-size:12px}
+@media(max-width:850px){.theme-workspace{grid-template-columns:1fr}.theme-detail-sidebar{flex-direction:row;gap:5px;overflow:auto;border-right:0;border-bottom:1px solid var(--border);padding:10px}.theme-detail-sidebar button{width:auto;flex:none;white-space:nowrap}.theme-style-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:500px){.theme-style-grid{grid-template-columns:1fr}.theme-accent-options{grid-template-columns:1fr}.theme-detail-body{padding:17px}}

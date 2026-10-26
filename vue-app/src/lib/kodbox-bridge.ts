@@ -4,7 +4,7 @@ import type {Vault} from './vault'
 export const kodboxRequested=new URLSearchParams(location.search).get('kodbox')==='1'
 export interface CloudStore {
  filename:string;fileId:string;initial:FilePackage<Vault>|null;baseline:string;writable:boolean;
- write(pack:FilePackage<Vault>):Promise<void>
+ write(pack:FilePackage<Vault>):Promise<void>;setDirty(value:boolean):void
 }
 let cloud:CloudStore|null=null
 export function getCloudStore(){return cloud}
@@ -29,7 +29,7 @@ export async function initCloudStore(){
   parent.postMessage({kind:'foldmemo:client',channel,type,requestId,data},origin)
  })
  const initial=await call('hello',null)
- if(initial.type!=='init'||typeof initial.data?.body!=='string'||!initial.data.writable)throw Error('KodBox 没有返回可读写的数据文件')
+ if(initial.type!=='init'||typeof initial.data?.body!=='string' )throw Error('KodBox 没有返回可读写的数据文件')
  const raw=initial.data.body.trim()
  let pack:FilePackage<Vault>|null=null
  if(raw&&raw!=='null'){
@@ -37,14 +37,15 @@ export async function initCloudStore(){
   try{value=JSON.parse(raw)}catch{throw Error('文件不是合法 JSON；为防止误覆盖已停止加载')}
   if(!value||(value as any).format!=='foldmemo-file-2')throw Error('非 FoldMemo v2 数据包；请新建空白 .foldmemo 然后导入旧 HTML')
   pack=value as FilePackage<Vault>
-  if(!pack.encrypted)throw Error('云端禁止使用明文保险库。请先在本地加密后再导入')
+  // Plaintext vaults are supported only after explicit user choice in the UI.
  }
  const store:CloudStore={
   filename:String(initial.data.filename||'vault.foldmemo'),
   fileId:String(initial.data.fileId||'unknown'),
-  initial:pack,baseline:String(initial.data.baseline||''),writable:true,
+  initial:pack,baseline:String(initial.data.baseline||''),writable:!!initial.data.writable,
+  setDirty(value){parent.postMessage({kind:'foldmemo:client',channel,type:'dirty',data:{dirty:!!value}},origin)},
   async write(next){
-   if(!next.encrypted)throw Error('云端必须启用打开密码，禁止上传明文')
+   if(!store.writable)throw Error('KodBox 当前账号没有写入权限，请重新打开文件检查权限')
    const result=await call('write',{expected:store.baseline,body:JSON.stringify(next)})
    if(result.type!=='written'||!result.data?.baseline)throw Error('KodBox 未确认写入')
    store.baseline=String(result.data.baseline)

@@ -1,18 +1,21 @@
 # FoldMemo KodBox Plugin
 
-FoldMemo 专用的 KodBox 在线加密保险库插件。本仓库与单 HTML 版本的 [FoldMemo](https://github.com/nljie1103/foldmemo) 完全独立。
+FoldMemo 的 KodBox 在线保险库插件，与[原单 HTML 版](https://github.com/nljie1103/foldmemo)互相独立。
 
-**版本：v0.1.0 开发预览。未完成真实 KodBox 实例联调，不建议存放唯一一份重要密码数据。**
+**v0.1.1 开发预览：已经由用户在 KodBox 实测创建、分类、记录、自动保存和重开解锁（v0.1.0）；v0.1.1 新增的服务端 CAS 尚需实机联调。**
 
-- 前端：Vue 3，Vite 多文件编译，独立可缓存的 JS/CSS。
-- 保险库：独立的 `.foldmemo` 加密 JSON 文件，不将应用代码重复写入数据文件。
-- 存储：KodBox 现有文件管理接口，读写确认及 SHA-256 内容校验。
-- 兼容：继续支持手动导入 FoldMemo v2 的单 HTML 保险库。
-- 安全：必须开启打开密码；原本的 KodBox HTML 预览沙盒保持不变。
+- Vue 3 和 Vite 拆分成可缓存的 HTML、JavaScript、CSS。
+- 数据存于 KodBox 内原有的 `.foldmemo` 文件，不再把程序包写入保险库。
+- 打开密码**可选**。开启：AES-GCM 加密；关闭：**文件内容明文**，必须自行确认风险。
+- KodBox 用户权限由服务器在每次保存前检查；同一 PHP 主机内，本插件的写入使用 `flock` + SHA-256 CAS + 写后读回验证。
+- 断网/冲突时禁止继续改动，保留本机恢复草稿；KodBox 弹窗关闭时提示未同步状态。
+- 仅允许将旧 HTML 导入空白 `.foldmemo`，禁止替换不同 ID 的现有保险库。
 
 ## 安装
 
-推荐通过 GitHub Release 下载 `foldmemo-kodbox-plugin-v0.1.0.zip`，解压得到 `foldMemo/` 插件目录，并安装到 KodBox `plugins/`，然后在后台启用。
+从 [Releases](https://github.com/nljie1103/foldmemo-kodbox-plugin/releases) 下载版本 ZIP，解压为 KodBox 服务器 `plugins/foldMemo/`，确认包含 `app.php`、`package.json`、`static/main.js` 与 `static/app/index.html`、`static/app/assets/*`。在 KodBox 插件中心启用插件并刷新网页。
+
+测试时在自己的 KodBox 目录创建 `test.foldmemo`，内容为 `null`；右键选择「FoldMemo 编辑保险库」。保存测试笔记后重新打开确认数据存在。
 
 从源码构建：
 
@@ -22,8 +25,8 @@ npm ci
 npm run build:kodbox
 cd ..
 node plugins/foldMemo/test-bridge.cjs
+php -l plugins/foldMemo/app.php
+php plugins/foldMemo/test-server.php
 ```
 
-**注意：** 当前自动保存仅采用客户端读-比较-写并校验返回结果，尚未实现服务端原子文件锁。两个设备几乎同时保存仍可能竞争。上线前需进一步验收多用户权限、并发和文件回滚。
-
-更多说明请见 [KodBox 开发文档](docs/KODBOX.md)。
+**限制：** `flock` 只协调同一 PHP 主机上经过本插件的并发保存；其他 KodBox 编辑器、多台 KodBox 服务节点、外部同步程序不一定使用同一把锁。不同存储驱动的并发安全需要进一步实测。对于重要账号信息保留离线加密备份。另见 [安装与技术说明](docs/KODBOX.md)。

@@ -2,17 +2,17 @@
   "id": "foldMemo",
   "name": "FoldMemo 云端保险库",
   "title": "FoldMemo 云端保险库",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "source": {
     "className": "x-item-icon x-txt",
     "icon": ""
   },
   "category": "file",
-  "description": "在 KodBox 编辑 FoldMemo 加密保险库；前端与加密数据文件分离",
+  "description": "KodBox FoldMemo 云端笔记保险库（独立资源、可选打开密码、服务端并发保护）",
   "keywords": "notes,encrypted,vault,foldmemo",
   "auther": {
     "copyright": "FoldMemo contributors",
-    "homePage": "https://github.com/nljie1103/foldmemo"
+    "homePage": "https://github.com/nljie1103/foldmemo-kodbox-plugin"
   },
   "configItem": {
     "pluginAuth": {

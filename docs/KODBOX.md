@@ -1,4 +1,4 @@
-# FoldMemo KodBox 插件 · v0.1.2
+# FoldMemo KodBox 插件 · v0.1.3
 
 本插件适用于已安装 KodBox 的 PHP 服务器。程序资源与 `.foldmemo` 保险库分离。安装测试请勿使用重要真实密码。
 
@@ -12,9 +12,17 @@
 
 从 GitHub 源码构建必须在 `vue-app` 运行 `npm ci` 和 `npm run build:kodbox`，生成 `plugins/foldMemo/static/app/index.html` 与 `assets/`；然后执行 `node plugins/foldMemo/test-bridge.cjs`、`php -l plugins/foldMemo/app.php` 和 `php plugins/foldMemo/test-server.php`。
 
+## 升级后旧脚本校验
+
+如果刚升级后仍显示“只能保存加密的 FoldMemo v2 保险库”，这是旧版 `static/main.js` 残留的典型表现。应先备份数据文件，再将插件目录完整替换为新版、重新启用插件，并在浏览器清除站点缓存。v0.1.3 的外层桥接会发送 `bridgeVersion: '0.1.3'`，新版内层会校验这一字段。新建空白 `null` 格式的 `.foldmemo` 文件允许自主选择设置或不设置打开密码。关闭打开密码会保存明文，应用会用 Vue 弹窗明确告知风险。
+
 ## 手机端删除验收
 
 打开 `test.foldmemo`，使用手机依次测试：新建一条测试记录 → 点击删除 → 点击取消应保留原记录 → 再点击删除并确认应进入回收站 → 从回收站恢复应返回记录列表 → 再次删除并选择永久删除应不可恢复。分类页面也需测试删除确认。删除后等待“云端已保存”，关闭重开验证结果。所有确认弹窗由应用内 Vue Dialog 提供，不再使用浏览器原生 `confirm()`。
+
+## 内嵌确认弹窗与浏览器离页警告
+
+KodBox 外层编辑器关闭时如果存在未同步修改，会通过 `postMessage` 请求 FoldMemo Vue Dialog，先尝试保存恢复草稿，然后由用户选择取消或确认关闭。创建保险库、不设置密码的风险告知、删除、永久删除、分类删除、导出和密码变更都使用 Vue Dialog。浏览器直接关闭标签页/刷新时的 `beforeunload` 属于浏览器安全机制，无法可靠改成异步 Vue 弹窗，因此保留。
 
 ## 保存链路
 

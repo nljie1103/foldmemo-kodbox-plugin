@@ -1,6 +1,6 @@
 <?php
 /**
- * FoldMemo KodBox plugin v0.1.1.
+ * FoldMemo KodBox plugin v0.1.3.
  * The trusted KodBox session enforces permissions. Flock serializes this
  * plugin's writers on a single KodBox PHP host. Other editors/storage nodes
  * do not share this lock and must not be treated as atomic participants.

@@ -2,10 +2,10 @@
 const fs=require('node:fs'),assert=require('node:assert/strict'),vm=require('node:vm');
 const source=fs.readFileSync(__dirname+'/static/main.js','utf8');
 const crypto=require('node:crypto').webcrypto;
-let value='null',writable=true,listener=null,closeAllowed=false,confirmCount=0;
+let value='null',writable=true,listener=null,dialogCloseCount=0;
 const answers=[],frame={postMessage:m=>answers.push(m)};
 const iframe={contentWindow:frame};
-const dialog={$main:{find:()=>({get:()=>iframe})},close(){return 'closed'},display(){return this},zIndex(){return this}};
+const dialog={$main:{find:()=>({get:()=>iframe})},close(){dialogCloseCount++;return 'closed'},display(){return this},zIndex(){return this}};
 const digest=async v=>Buffer.from(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v))).toString('hex');
 const $={dialog:{list:{}},ajax:async options=>{
  const {success,error}=options;
@@ -26,7 +26,7 @@ const env={kodReady:[],kodApp:{pathModel:{fileContent:(_p,cb)=>queueMicrotask(()
  Events:{bind:(_n,cb)=>env.setup=cb},core:{openDialog:()=>dialog},$,
  Tips:{tips:()=>{throw Error('unexpected popup')}},location:{origin:'https://kodbox.test'},
  crypto,TextEncoder,Promise,Number,Error,Date,setTimeout,clearTimeout,
- md5:x=>'id'+x,confirm:()=>{confirmCount++;return closeAllowed}};
+ md5:x=>'id'+x};
 env.window.kodApp=env.kodApp;
 vm.runInNewContext(source,env);
 env.kodReady[0]();const apps=[];env.setup(apps);
@@ -38,6 +38,7 @@ const flush=()=>new Promise(resolve=>setTimeout(resolve,50));
 (async()=>{
  send('hello','init');await flush();assert.equal(answers.at(-1).type,'init');
  assert.equal(answers.at(-1).data.writable,true);
+ assert.equal(answers.at(-1).data.bridgeVersion,'0.1.3');
  let baseline=answers.at(-1).data.baseline;
  const sealed=JSON.stringify({format:'foldmemo-file-2',vaultId:'unit-test',encrypted:true,content:{iv:'test'},keyWrap:{}});
  send('dirty','', {dirty:true});send('write','encrypted',{expected:baseline,body:sealed});await flush();
@@ -54,7 +55,15 @@ const flush=()=>new Promise(resolve=>setTimeout(resolve,50));
  assert.equal(answers.at(-1).type,'error');assert.equal(value,clear);
  writable=true;value='null';send('write','conflict',{expected:baseline,body:clear});await flush();
  assert.equal(answers.at(-1).type,'error');assert.equal(value,'null');
- assert.equal(dialog.close(),undefined);assert.equal(confirmCount,1);
- closeAllowed=true;assert.equal(dialog.close(),'closed');assert.equal(listener,null);
- console.log('PASS v0.1.1: access API, encrypted and plaintext writes, vault ID, permissions, CAS conflict, dirty close guard');
+ assert.equal(dialog.close(),undefined);
+ const request1=answers.at(-1);assert.equal(request1.type,'confirm-close');
+ assert.equal(dialogCloseCount,0,'Do not close while confirmation pending');
+ send('close-decision',request1.requestId,{approved:false});await flush();
+ assert.equal(dialogCloseCount,0,'Cancel must keep window');
+ assert.equal(dialog.close(),undefined);
+ const request2=answers.at(-1);assert.equal(request2.type,'confirm-close');
+ assert.notEqual(request2.requestId,request1.requestId);
+ send('close-decision',request2.requestId,{approved:true});await flush();
+ assert.equal(dialogCloseCount,1,'Approval closes the window');assert.equal(listener,null);
+ console.log('PASS v0.1.3: permissions, CAS, plaintext, vault IDs, handshake and in-app close confirmation');
 })().catch(e=>{console.error(e);process.exitCode=1});

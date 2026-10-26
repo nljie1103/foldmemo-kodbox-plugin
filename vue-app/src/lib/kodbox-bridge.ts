@@ -1,10 +1,10 @@
-/** KodBox trusted opener bridge. The data file contains only encrypted v2 JSON. */
+/** KodBox trusted opener bridge. The data file is FoldMemo v2 JSON; encryption is optional. */
 import type {FilePackage} from './security-v2'
 import type {Vault} from './vault'
 export const kodboxRequested=new URLSearchParams(location.search).get('kodbox')==='1'
 export interface CloudStore {
  filename:string;fileId:string;initial:FilePackage<Vault>|null;baseline:string;writable:boolean;
- write(pack:FilePackage<Vault>):Promise<void>;setDirty(value:boolean):void
+ write(pack:FilePackage<Vault>):Promise<void>;setDirty(value:boolean):void;setCloseHandler(handler:(()=>Promise<boolean>)|null):void
 }
 let cloud:CloudStore|null=null
 export function getCloudStore(){return cloud}
@@ -13,9 +13,18 @@ export async function initCloudStore(){
  if(!/^https?:$/.test(location.protocol)||parent===window||!crypto.subtle)throw Error('请从已登录 KodBox 文件管理器打开保险库')
  const channel=crypto.randomUUID(),origin=location.origin
  const pending=new Map<string,{resolve:(v:any)=>void,reject:(e:Error)=>void,timer:ReturnType<typeof setTimeout>}>()
+ let closeHandler:(()=>Promise<boolean>)|null=null
  const listener=(event:MessageEvent)=>{
   if(event.source!==parent||event.origin!==origin)return
   const m=event.data;if(m?.kind!=='foldmemo:host'||m.channel!==channel||!m.requestId)return
+  if(m.type==='confirm-close'){
+   void (async()=>{
+    let approved=false
+    try{if(closeHandler)approved=await closeHandler()}catch{approved=false}
+    parent.postMessage({kind:'foldmemo:client',channel,type:'close-decision',requestId:m.requestId,data:{approved}},origin)
+   })()
+   return
+  }
   const task=pending.get(m.requestId);if(!task)return
   clearTimeout(task.timer);pending.delete(m.requestId)
   if(m.type==='error')task.reject(Error(String(m.data?.message||'KodBox 操作失败')))
@@ -29,7 +38,8 @@ export async function initCloudStore(){
   parent.postMessage({kind:'foldmemo:client',channel,type,requestId,data},origin)
  })
  const initial=await call('hello',null)
- if(initial.type!=='init'||typeof initial.data?.body!=='string' )throw Error('KodBox 没有返回可读写的数据文件')
+ if(initial.type!=='init'||typeof initial.data?.body!=='string')throw Error('KodBox 未返回保险库文件内容')
+ if(initial.data.bridgeVersion!=='0.1.3')throw Error('KodBox 旧版桥接脚本仍在运行。请用 v0.1.3 完整覆盖 plugins/foldMemo，重新启用插件，并清除 KodBox / 浏览器缓存后刷新。')
  const raw=initial.data.body.trim()
  let pack:FilePackage<Vault>|null=null
  if(raw&&raw!=='null'){
@@ -44,6 +54,7 @@ export async function initCloudStore(){
   fileId:String(initial.data.fileId||'unknown'),
   initial:pack,baseline:String(initial.data.baseline||''),writable:!!initial.data.writable,
   setDirty(value){parent.postMessage({kind:'foldmemo:client',channel,type:'dirty',data:{dirty:!!value}},origin)},
+  setCloseHandler(handler){closeHandler=handler},
   async write(next){
    if(!store.writable)throw Error('KodBox 当前账号没有写入权限，请重新打开文件检查权限')
    const result=await call('write',{expected:store.baseline,body:JSON.stringify(next)})

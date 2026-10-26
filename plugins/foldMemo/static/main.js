@@ -1,4 +1,4 @@
-/* FoldMemo KodBox trusted file opener. v0.1.1 */
+/* FoldMemo KodBox trusted file opener. v0.1.3 */
 kodReady.push(function(){
  Events.bind('explorer.kodApp.before',function(appList){
   if(!window.kodApp||!kodApp.pathModel||typeof kodApp.pathModel.fileContent!=='function')return;
@@ -10,11 +10,11 @@ kodReady.push(function(){
     if(/^https?:\/\//i.test(filePath))return Tips.tips('分享外链不能作为可写保险库','warning');
     var uuid='foldmemo-'+(typeof md5==='function'?md5(filePath):Date.now());
     var existing=$.dialog.list[uuid];if(existing){existing.display(true).zIndex();return;}
-    var dialog=core.openDialog('{{pluginHost}}static/app/index.html?kodbox=1','x-item-icon x-txt',name||'FoldMemo',uuid,{width:'92%',height:'90%',lock:false});
+    var dialog=core.openDialog('{{pluginHost}}static/app/index.html?kodbox=1&v={{package.version}}','x-item-icon x-txt',name||'FoldMemo',uuid,{width:'92%',height:'90%',lock:false});
     if(!dialog||!dialog.$main)return;
     var iframe=dialog.$main.find('iframe').get(0);
     if(!iframe){dialog.close();return Tips.tips('FoldMemo 编辑窗口打开失败','warning');}
-    var model=kodApp.pathModel,channel=null,baseline=null,writing=false,closed=false,dirty=false;
+    var model=kodApp.pathModel,channel=null,baseline=null,writing=false,closed=false,dirty=false,closeRequestId=null,closeApproved=false;
     var MAX=26*1024*1024,TIMEOUT=24000;
     function digest(s){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)).then(function(b){return Array.from(new Uint8Array(b),function(v){return v.toString(16).padStart(2,'0')}).join('')})}
     function read(){
@@ -49,11 +49,17 @@ kodReady.push(function(){
         var content=await read(),permission=false;
         try{var check=await request('access',{path:filePath});permission=!!check.writable}catch(_e){permission=false}
         baseline=await digest(content);
-        send('init',m.requestId,{body:content,baseline:baseline,filename:name||'vault.foldmemo',fileId:String(typeof md5==='function'?md5(filePath):filePath),writable:permission});
+        send('init',m.requestId,{body:content,baseline:baseline,filename:name||'vault.foldmemo',fileId:String(typeof md5==='function'?md5(filePath):filePath),writable:permission,bridgeVersion:'0.1.3'});
       }catch(e){send('error',m.requestId,{message:String(e.message||e)})}
       return;
      }
      if(m.channel!==channel)return;
+     if(m.type==='close-decision'){
+      if(!closeRequestId||m.requestId!==closeRequestId)return;
+      closeRequestId=null;
+      if(m.data&&m.data.approved===true){closeApproved=true;dialog.close()}
+      return;
+     }
      if(m.type==='dirty'){dirty=!!m.data?.dirty;return}
      if(m.type!=='write')return;
      if(writing){send('error',m.requestId,{message:'正在保存，请稍后重试'});return}
@@ -71,7 +77,13 @@ kodReady.push(function(){
     window.addEventListener('message',onMessage);
     var priorClose=dialog.close;
     dialog.close=function(){
-      if(dirty&&!confirm('FoldMemo 有尚未确认写入云端的修改。直接关闭可能丢失数据，确定关闭吗？'))return;
+      if(dirty&&!closeApproved){
+        if(closeRequestId)return;
+        if(!channel){Tips.tips('FoldMemo 正在初始化，无法确认关闭','warning');return}
+        closeRequestId=(crypto.randomUUID?crypto.randomUUID():('close-'+Date.now()));
+        send('confirm-close',closeRequestId,{dirty:true});
+        return;
+      }
       closed=true;window.removeEventListener('message',onMessage);return priorClose.apply(this,arguments);
     }
    }

@@ -30,6 +30,15 @@ jobs:
         run: |
           php -l plugins/foldMemo/app.php
           php plugins/foldMemo/test-server.php
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: curl, zip, mbstring
+      - name: FoldMemo updater security regression
+        run: |
+          php -r "exit(class_exists('ZipArchive') && function_exists('curl_init') ? 0 : 1);"
+          php -l plugins/foldMemo/update-service.php
+          php plugins/foldMemo/test-update.php
       - name: Verify build outputs
         run: |
           test -s plugins/foldMemo/static/app/index.html

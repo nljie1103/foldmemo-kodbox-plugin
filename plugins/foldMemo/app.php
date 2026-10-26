@@ -1,6 +1,6 @@
 <?php
 /**
- * FoldMemo KodBox plugin v0.1.3.
+ * FoldMemo KodBox plugin v0.1.4.
  * The trusted KodBox session enforces permissions. Flock serializes this
  * plugin's writers on a single KodBox PHP host. Other editors/storage nodes
  * do not share this lock and must not be treated as atomic participants.
@@ -29,6 +29,16 @@ class foldMemoPlugin extends PluginBase {
             exit;
         }
         return $path;
+    }
+
+    /** Root-only update endpoints; never accept a client-supplied URL or ZIP. */
+    public function updateCheck() {
+        require_once __DIR__ . '/update-service.php';
+        FoldMemoUpdateService::check();
+    }
+    public function updateInstall() {
+        require_once __DIR__ . '/update-service.php';
+        FoldMemoUpdateService::install($this->in);
     }
 
     /** Frontend may edit only when the *server* confirms file access. */

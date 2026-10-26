@@ -1,4 +1,4 @@
-/* FoldMemo KodBox trusted file opener. v0.1.3 */
+/* FoldMemo KodBox trusted file opener. v0.1.4 */
 kodReady.push(function(){
  Events.bind('explorer.kodApp.before',function(appList){
   if(!window.kodApp||!kodApp.pathModel||typeof kodApp.pathModel.fileContent!=='function')return;
@@ -30,7 +30,7 @@ kodReady.push(function(){
     }
     function request(action,data){
       return new Promise(function(resolve,reject){
-        $.ajax({url:'{{pluginApi}}'+action,type:'POST',data:data,dataType:'json',timeout:TIMEOUT,
+        $.ajax({url:'{{pluginApi}}'+action,type:'POST',data:data,dataType:'json',timeout:(action==='updateInstall'?180000:action==='updateCheck'?90000:TIMEOUT),
           success:function(result){
             if(!result||!result.code)return reject(Error(result&&result.msg||'KodBox 拒绝操作'));
             resolve(result.data)
@@ -49,7 +49,7 @@ kodReady.push(function(){
         var content=await read(),permission=false;
         try{var check=await request('access',{path:filePath});permission=!!check.writable}catch(_e){permission=false}
         baseline=await digest(content);
-        send('init',m.requestId,{body:content,baseline:baseline,filename:name||'vault.foldmemo',fileId:String(typeof md5==='function'?md5(filePath):filePath),writable:permission,bridgeVersion:'0.1.3'});
+        send('init',m.requestId,{body:content,baseline:baseline,filename:name||'vault.foldmemo',fileId:String(typeof md5==='function'?md5(filePath):filePath),writable:permission,bridgeVersion:'0.1.4'});
       }catch(e){send('error',m.requestId,{message:String(e.message||e)})}
       return;
      }
@@ -61,6 +61,15 @@ kodReady.push(function(){
       return;
      }
      if(m.type==='dirty'){dirty=!!m.data?.dirty;return}
+     if(m.type==='update-check'||m.type==='update-install'){
+      try{
+       var action=m.type==='update-check'?'updateCheck':'updateInstall';
+       var params=m.type==='update-check'?{}:{version:String(m.data&&m.data.version||''),nonce:String(m.data&&m.data.nonce||'')};
+       var status=await request(action,params);
+       send(m.type==='update-check'?'update-status':'update-done',m.requestId,status);
+      }catch(e){send('error',m.requestId,{message:String(e.message||e)})}
+      return;
+     }
      if(m.type!=='write')return;
      if(writing){send('error',m.requestId,{message:'正在保存，请稍后重试'});return}
      writing=true;

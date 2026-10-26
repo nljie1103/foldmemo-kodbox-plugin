@@ -10,6 +10,8 @@ const digest=async v=>Buffer.from(await crypto.subtle.digest('SHA-256',new TextE
 const $={dialog:{list:{}},ajax:async options=>{
  const {success,error}=options;
  try{
+  if(options.url.includes('updateCheck'))return success({code:true,data:{current:'0.1.4',latest:'0.1.5',available:true,installNonce:'test-nonce'}});
+  if(options.url.includes('updateInstall'))return success({code:true,data:{installed:'0.1.5',previous:'0.1.4'}});
   if(options.url.includes('access'))return success({code:true,data:{writable}});
   if(!options.url.includes('atomicSave'))throw Error('unexpected endpoint');
   if(!writable)return success({code:false,msg:'permission denied'});
@@ -38,7 +40,7 @@ const flush=()=>new Promise(resolve=>setTimeout(resolve,50));
 (async()=>{
  send('hello','init');await flush();assert.equal(answers.at(-1).type,'init');
  assert.equal(answers.at(-1).data.writable,true);
- assert.equal(answers.at(-1).data.bridgeVersion,'0.1.3');
+ assert.equal(answers.at(-1).data.bridgeVersion,'0.1.4');
  let baseline=answers.at(-1).data.baseline;
  const sealed=JSON.stringify({format:'foldmemo-file-2',vaultId:'unit-test',encrypted:true,content:{iv:'test'},keyWrap:{}});
  send('dirty','', {dirty:true});send('write','encrypted',{expected:baseline,body:sealed});await flush();
@@ -55,6 +57,10 @@ const flush=()=>new Promise(resolve=>setTimeout(resolve,50));
  assert.equal(answers.at(-1).type,'error');assert.equal(value,clear);
  writable=true;value='null';send('write','conflict',{expected:baseline,body:clear});await flush();
  assert.equal(answers.at(-1).type,'error');assert.equal(value,'null');
+ send('update-check','check',{});await flush();
+ assert.equal(answers.at(-1).type,'update-status');
+ send('update-install','install',{version:'0.1.5',nonce:'test-nonce'});await flush();
+ assert.equal(answers.at(-1).type,'update-done');
  assert.equal(dialog.close(),undefined);
  const request1=answers.at(-1);assert.equal(request1.type,'confirm-close');
  assert.equal(dialogCloseCount,0,'Do not close while confirmation pending');

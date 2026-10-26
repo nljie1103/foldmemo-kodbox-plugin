@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
-import { Home, NotebookTabs, Tags, Settings2, PanelLeftClose, Plus, Search, Star, Eye, EyeOff, Copy, ExternalLink, Trash2, Lock, Unlock, FileDown, Upload, Download, ShieldCheck, Save, GripVertical, Pencil, ArrowLeft, Check, BookOpen, Menu, Moon, Sun } from 'lucide-vue-next'
+import { Home, NotebookTabs, Tags, Settings2, PanelLeftClose, Plus, Search, Star, Eye, EyeOff, Copy, ExternalLink, Trash2, Lock, Unlock, FileDown, Upload, Download, ShieldCheck, Save, GripVertical, Pencil, ArrowLeft, Check, BookOpen, Menu, Moon, Sun, RefreshCw, CloudDownload } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -18,9 +18,44 @@ import { id, newVault, validate, unpack, verifier, filename, htmlWithVault, down
 import { UNFILED_CHOICE, initialCategoryId, categoryForSave, matchesItemFilter } from '@/lib/note-classification'
 import {getCloudStore} from '@/lib/kodbox-bridge'
 
+type UpdateStatus = {
+ current:string; latest:string; available:boolean; tag:string; notes:string;
+ publishedAt:string; url:string; sha256:string; size:number; installNonce:string
+}
+const onlineUpdate = ref<UpdateStatus|null>(null)
+const onlineUpdateBusy = ref(false)
+const onlineUpdateError = ref('')
+const onlineUpdateInstalled = ref('')
+async function checkOnlineUpdate(){
+ if(!cloudMode || onlineUpdateBusy.value)return
+ onlineUpdateBusy.value=true;onlineUpdateError.value=''
+ try {onlineUpdate.value=await cloud!.checkUpdate()} catch(e) {onlineUpdateError.value=String(e instanceof Error?e.message:e)}
+ finally {onlineUpdateBusy.value=false}
+}
+async function installOnlineUpdate(){
+ const candidate=onlineUpdate.value
+ if(!cloudMode || !candidate?.available || onlineUpdateBusy.value)return
+ if(dirty.value || saveState.value==='saving'){
+  onlineUpdateError.value='存在未同步的笔记修改。请先保存，再更新插件。';return
+ }
+ const version=candidate.latest
+ if(!(await requestConfirm('即将从官方 GitHub Release 安装 FoldMemo v'+version+'。服务器会校验哈希并备份旧插件。请确认所有 FoldMemo 窗口的数据已经保存，更新完成后需要刷新整个 KodBox 页面。')))return
+ onlineUpdateBusy.value=true;onlineUpdateError.value=''
+ try {
+  const result=await cloud!.installUpdate(version,candidate.installNonce)
+  if(!result || result.installed!==version)throw Error('服务器未确认更新结果')
+  onlineUpdateInstalled.value=version
+ }catch(e){onlineUpdateError.value=String(e instanceof Error?e.message:e)}
+ finally {onlineUpdateBusy.value=false}
+}
+function reloadKodboxAfterUpdate(){
+ if(window.top && window.top!==window)window.top.location.reload()
+ else window.location.reload()
+}
+
 const cloud=getCloudStore()
 const cloudMode=!!cloud
-type Page='home'|'notes'|'categories'|'trash'|'settings'|'theme'
+type Page='home'|'notes'|'categories'|'trash'|'settings'|'theme'|'updates'
 const tx=(zh:string,en:string)=>vault.value?.appearance.language==='en'?en:zh
 const vault=ref<Vault|null>(null)
 const page=ref<Page>('home'), sidebarOpen=ref(window.innerWidth>=1000), filter=ref('all'), search=ref('')
@@ -243,7 +278,7 @@ function changePage(p:Page){page.value=p;editorOpen.value=false;noteOpen.value=n
         <div v-if="(recoverySelected ? getCachedPackage()?.encrypted : firstPack?.encrypted)" class="grid gap-1"><Label>打开密码</Label><Input v-model="passphrase" type="password" autocomplete="current-password" @keydown.enter="attempt(unlock)" /></div>
         <Button :disabled="busy" @click="attempt(unlock)">解锁</Button>
       </template>
-      <div class="flex justify-between gap-2"><Button variant="outline" @click="embeddedImportInput?.click()"><Upload class="mr-2" :size="15"/>手动导入保险库</Button><Badge variant="outline">{{cloudMode?'KodBox v0.1.3':'v2.0.3'}}</Badge></div>
+      <div class="flex justify-between gap-2"><Button variant="outline" @click="embeddedImportInput?.click()"><Upload class="mr-2" :size="15"/>手动导入保险库</Button><Badge variant="outline">{{cloudMode?'KodBox v0.1.4':'v2.0.3'}}</Badge></div>
       <div v-if="pendingDraft" class="grid gap-2"><p class="small-note">发现本机恢复草稿。默认以当前 HTML 为准，只有你明确点击才使用草稿。</p><Button variant="outline" @click="recoverySelected=!recoverySelected;lockMode='unlock'">{{recoverySelected?'取消草稿恢复':'恢复本机未同步草稿'}}</Button></div>
       <p v-if="uiError" class="text-destructive text-xs">{{uiError}}</p>
     </CardContent>
@@ -264,12 +299,13 @@ function changePage(p:Page){page.value=p;editorOpen.value=false;noteOpen.value=n
     <nav class="sidebar-nav grid content-start gap-1">
       <div v-if="appearance.style==='minimal' && sidebarOpen" class="nd-side-section">▴ 快捷访问</div><div v-if="appearance.style==='modern' && sidebarOpen" class="modern-group-label">工作空间 / WORKSPACE</div>
       <button v-for="x in [{key:'home',label:'首页',icon:Home},{key:'notes',label:'笔记与记录',icon:NotebookTabs},{key:'categories',label:'分类管理',icon:Tags},{key:'trash',label:'回收站',icon:Trash2},{key:'settings',label:'设置',icon:Settings2}]" :key="x.key" class="side-link" :class="{active:page===x.key}" :title="x.label" @click="changePage(x.key as Page)"><component :is="x.icon" :size="18"/><span class="side-label">{{x.label}}</span></button>
+       <button v-if="cloudMode" class="side-link" :class="{active:page==='updates'}" title="在线更新" @click="changePage('updates')"><RefreshCw :size="18"/><span class="side-label">在线更新</span></button>
     </nav>
     <div class="sidebar-theme-group"><div v-if="sidebarOpen" class="sidebar-section-label">外观</div><button class="side-link sidebar-theme-link" :class="{active:page==='theme'}" title="系统主题" @click="changePage('theme')"><Sun :size="18"/><span class="side-label">系统主题</span></button></div>
     <div class="nd-sidebar-bottom"><button class="side-link" title="锁定" @click="lock"><Lock :size="18"/><span class="side-label">锁定保险库</span></button><div v-if="appearance.style==='minimal' && sidebarOpen" class="nd-profile"><div class="nd-avatar">F</div><div class="nd-profile-copy"><strong>私人保险库</strong><span>{{allItems.length}} 条记录 · 本地</span></div></div></div>
   </aside>
   <section class="work">
-    <header v-if="appearance.style==='modern'" class="modern-topbar"><div class="modern-breadcrumb"><span>FoldMemo</span><span class="modern-slash">/</span><strong>{{({home:'仪表盘',notes:'笔记与记录',categories:'分类管理',trash:'回收站',settings:'设置',theme:'系统主题'} as Record<Page,string>)[page]}}</strong></div><div class="modern-top-actions"><span class="modern-top-status">{{saveStateLabel}}</span><button class="modern-top-icon" title="切换日间/夜间" @click="editAppearance('mode',appearance.mode==='dark'?'light':'dark')"><Sun v-if="appearance.mode==='dark'" :size="16"/><Moon v-else :size="16"/></button><button class="modern-top-icon" title="系统主题" @click="changePage('theme')"><Settings2 :size="16"/></button><span class="modern-top-avatar">F</span></div></header>
+    <header v-if="appearance.style==='modern'" class="modern-topbar"><div class="modern-breadcrumb"><span>FoldMemo</span><span class="modern-slash">/</span><strong>{{({home:'仪表盘',notes:'笔记与记录',categories:'分类管理',trash:'回收站',settings:'设置',theme:'系统主题',updates:'在线更新'} as Record<Page,string>)[page]}}</strong></div><div class="modern-top-actions"><span class="modern-top-status">{{saveStateLabel}}</span><button class="modern-top-icon" title="切换日间/夜间" @click="editAppearance('mode',appearance.mode==='dark'?'light':'dark')"><Sun v-if="appearance.mode==='dark'" :size="16"/><Moon v-else :size="16"/></button><button class="modern-top-icon" title="系统主题" @click="changePage('theme')"><Settings2 :size="16"/></button><span class="modern-top-avatar">F</span></div></header>
     <!-- 简洁风：只在编辑记录时显示 Chrome 式工作标签，分类筛选永远在下方内容区。 -->
     <div v-if="appearance.style==='minimal' && editorOpen" class="toolbar-tab"><button class="editor-tab" @click="editorOpen=false">{{editorId?'编辑':'新建'}} · {{draft.title||'未命名'}} <span class="ml-3">×</span></button></div>
     <div class="content" :class="{'nd-content':appearance.style==='minimal'}">
@@ -341,6 +377,25 @@ function changePage(p:Page){page.value=p;editorOpen.value=false;noteOpen.value=n
             <section v-else class="theme-setting-panel"><h2>显示与语言</h2><p class="theme-panel-hint">卡片视图与列表视图对所有风格生效。</p><div class="setting-line"><div><strong>内容布局</strong><p class="small-note">卡片 / 列表</p></div><Select :model-value="appearance.cards" @update:model-value="v=>editAppearance('cards',v as Vault['appearance']['cards'])"><SelectTrigger class="w-44"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="cards">卡片</SelectItem><SelectItem value="list">列表</SelectItem></SelectContent></Select></div><div class="setting-line"><div><strong>界面语言</strong><p class="small-note">保留当前语言设置</p></div><Select :model-value="appearance.language" @update:model-value="v=>editAppearance('language',v as 'zh'|'en')"><SelectTrigger class="w-44"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="zh">中文</SelectItem><SelectItem value="en">English</SelectItem></SelectContent></Select></div></section>
           </div>
         </div>
+      </div>
+      <div v-else-if="page==='updates'" class="section">
+        <div class="content-top"><div><h1 class="page-title">在线更新</h1><p class="subhead">从 GitHub 官方 Release 检查并安装 FoldMemo 插件更新</p></div></div>
+        <Card class="work-card">
+          <CardHeader><CardTitle class="flex items-center gap-2"><RefreshCw :size="19"/>插件版本</CardTitle><CardDescription>仅 KodBox 系统管理员可以执行在线更新；个人 .foldmemo 文件不参与更新</CardDescription></CardHeader>
+          <CardContent class="grid gap-4">
+            <div class="setting-line"><div><strong>当前版本</strong><p class="small-note">已安装在服务器的 FoldMemo 插件</p></div><Badge variant="secondary">{{onlineUpdate?.current || '0.1.4'}}</Badge></div>
+            <div v-if="onlineUpdate" class="setting-line"><div><strong>GitHub 最新正式版</strong><p class="small-note">{{onlineUpdate.publishedAt ? new Date(onlineUpdate.publishedAt).toLocaleString() : '已确认正式 Release'}}</p></div><Badge :variant="onlineUpdate.available?'default':'secondary'">v{{onlineUpdate.latest}}</Badge></div>
+            <p v-if="onlineUpdate && !onlineUpdate.available" class="small-note">当前已经是最新版本，无需重新安装。</p>
+            <div v-if="onlineUpdate?.notes" class="grid gap-2"><strong class="text-sm">更新日志</strong><pre class="rounded-lg border p-3 whitespace-pre-wrap break-words text-xs max-h-72 overflow-auto">{{onlineUpdate.notes}}</pre><a :href="onlineUpdate.url" target="_blank" rel="noopener noreferrer" class="text-sm underline">在 GitHub 查看正式 Release</a></div>
+            <p v-if="onlineUpdateError" class="text-sm text-destructive" role="alert">{{onlineUpdateError}}</p>
+            <div v-if="onlineUpdateInstalled" class="grid gap-3"><p class="text-sm">v{{onlineUpdateInstalled}} 已成功安装。旧版本已经备份，请保存所有打开窗口的数据，然后重新载入 KodBox。</p><Button @click="reloadKodboxAfterUpdate">刷新整个 KodBox</Button></div>
+            <div v-else class="flex flex-wrap gap-2">
+              <Button variant="outline" :disabled="onlineUpdateBusy" @click="checkOnlineUpdate"><RefreshCw :size="16" class="mr-2"/>{{onlineUpdateBusy?'正在检查或安装…':'检查更新'}}</Button>
+              <Button v-if="onlineUpdate?.available" :disabled="onlineUpdateBusy || dirty" @click="installOnlineUpdate"><CloudDownload :size="16" class="mr-2"/>安装 v{{onlineUpdate.latest}}</Button>
+            </div>
+            <p class="small-note">安全校验：固定 GitHub 官方仓库、正式版本、ZIP SHA-256、包内路径和版本；更新前备份，失败时尝试回滚。需要服务器具备 cURL、ZipArchive 和插件目录写入权限。</p>
+          </CardContent>
+        </Card>
       </div>
       <div v-else-if="page==='settings'" class="section">
         <div class="content-top"><div><h1 class="page-title">设置</h1><p class="subhead">独立密码、当前文件管理、保险库导入与导出</p></div></div>

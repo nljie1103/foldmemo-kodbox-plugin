@@ -4,6 +4,8 @@ import type {Vault} from './vault'
 export const kodboxRequested=new URLSearchParams(location.search).get('kodbox')==='1'
 export interface CloudStore {
  filename:string;fileId:string;initial:FilePackage<Vault>|null;baseline:string;writable:boolean;
+  checkUpdate():Promise<{current:string;latest:string;available:boolean;tag:string;notes:string;publishedAt:string;url:string;sha256:string;size:number;installNonce:string}>;
+  installUpdate(version:string,nonce:string):Promise<{installed:string;previous:string;backup:string;message:string}>;
  write(pack:FilePackage<Vault>):Promise<void>;setDirty(value:boolean):void;setCloseHandler(handler:(()=>Promise<boolean>)|null):void
 }
 let cloud:CloudStore|null=null
@@ -33,13 +35,13 @@ export async function initCloudStore(){
  window.addEventListener('message',listener)
  const call=(type:string,data:any):Promise<any>=>new Promise((resolve,reject)=>{
   const requestId=crypto.randomUUID()
-  const timer=setTimeout(()=>{pending.delete(requestId);reject(Error('KodBox 请求超时，请检查登录状态'))},18000)
+  const timer=setTimeout(()=>{pending.delete(requestId);reject(Error('KodBox 请求超时，请检查登录状态'))},type==='update-install'?190000:type==='update-check'?100000:18000)
   pending.set(requestId,{resolve,reject,timer})
   parent.postMessage({kind:'foldmemo:client',channel,type,requestId,data},origin)
  })
  const initial=await call('hello',null)
  if(initial.type!=='init'||typeof initial.data?.body!=='string')throw Error('KodBox 未返回保险库文件内容')
- if(initial.data.bridgeVersion!=='0.1.3')throw Error('KodBox 旧版桥接脚本仍在运行。请用 v0.1.3 完整覆盖 plugins/foldMemo，重新启用插件，并清除 KodBox / 浏览器缓存后刷新。')
+ if(initial.data.bridgeVersion!=='0.1.4')throw Error('KodBox 旧版桥接脚本仍在运行。请用 v0.1.4 完整覆盖 plugins/foldMemo，重新启用插件，并清除 KodBox / 浏览器缓存后刷新。')
  const raw=initial.data.body.trim()
  let pack:FilePackage<Vault>|null=null
  if(raw&&raw!=='null'){
@@ -55,6 +57,16 @@ export async function initCloudStore(){
   initial:pack,baseline:String(initial.data.baseline||''),writable:!!initial.data.writable,
   setDirty(value){parent.postMessage({kind:'foldmemo:client',channel,type:'dirty',data:{dirty:!!value}},origin)},
   setCloseHandler(handler){closeHandler=handler},
+  async checkUpdate(){
+   const result=await call('update-check',{})
+   if(result.type!=='update-status'||!result.data)throw Error('未收到插件更新状态')
+   return result.data
+  },
+  async installUpdate(version,nonce){
+   const result=await call('update-install',{version,nonce})
+   if(result.type!=='update-done'||!result.data?.installed)throw Error('服务器没有确认安装完成')
+   return result.data
+  },
   async write(next){
    if(!store.writable)throw Error('KodBox 当前账号没有写入权限，请重新打开文件检查权限')
    const result=await call('write',{expected:store.baseline,body:JSON.stringify(next)})

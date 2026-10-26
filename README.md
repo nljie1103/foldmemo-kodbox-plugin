@@ -2,6 +2,8 @@
 
 FoldMemo 的 KodBox 在线保险库插件，与[原单 HTML 版](https://github.com/nljie1103/foldmemo)互相独立。
 
+**v0.1.4：侧边栏新增「在线更新」，KodBox 系统管理员可以检查 GitHub 正式 Release、下载校验、备份并安装更新。原 v0.1.3 的功能继续保留。
+
 **v0.1.3：统一 KodBox 和 Vue 内部确认弹窗，修复旧版桥接缓存误报，以及首次创建和窗口关闭操作。手机端仍需要实机验收。**
 
 - Vue 3 和 Vite 拆分成可缓存的 HTML、JavaScript、CSS。
@@ -34,3 +36,12 @@ php plugins/foldMemo/test-server.php
 ```
 
 **限制：** `flock` 只协调同一 PHP 主机上经过本插件的并发保存；其他 KodBox 编辑器、多台 KodBox 服务节点、外部同步程序不一定使用同一把锁。不同存储驱动的并发安全需要进一步实测。对于重要账号信息保留离线加密备份。另见 [安装与技术说明](docs/KODBOX.md)。
+
+
+## v0.1.4 在线更新
+
+打开 KodBox 中的 `.foldmemo` 文件并解锁，点击左侧「在线更新」。仅系统管理员能检查版本和安装。管理员确认后，服务器从固定 GitHub 仓库取得正式 Release，严格校验版本、ZIP SHA-256、体积、包内路径，备份旧插件后切换至新版；失败则尝试回滚。安装完成须保存所有 FoldMemo 窗口的数据并刷新整个 KodBox 页面。
+
+环境要求：PHP cURL、ZipArchive、可写的 `plugins/` 和 `plugins/foldMemo/`。旧版备份保留在 `plugins/.foldmemo-updater/backup-*`，可由服务器管理员手工清理。更新包含 PHP 代码，务必仅使用可信的官方 GitHub 仓库和可信 Release。
+
+本功能需要 v0.1.4 插件先通过正常方式安装一次，之后才能使用自更新；部分限制写入权限/多节点部署需手动升级。插件无法替代 KodBox 本体的升级。

@@ -2,7 +2,7 @@
 
 FoldMemo 的 KodBox 在线保险库插件，与[原单 HTML 版](https://github.com/nljie1103/foldmemo)互相独立。
 
-**v0.1.1 开发预览：已经由用户在 KodBox 实测创建、分类、记录、自动保存和重开解锁（v0.1.0）；v0.1.1 新增的服务端 CAS 尚需实机联调。**
+**v0.1.2 开发预览：修复 KodBox 手机端原生确认弹窗导致的删除失败；等待移动端实机验收。云端保存和服务端 CAS 仍须在所用 KodBox 版本上复核。**
 
 - Vue 3 和 Vite 拆分成可缓存的 HTML、JavaScript、CSS。
 - 数据存于 KodBox 内原有的 `.foldmemo` 文件，不再把程序包写入保险库。
@@ -10,6 +10,7 @@ FoldMemo 的 KodBox 在线保险库插件，与[原单 HTML 版](https://github.
 - KodBox 用户权限由服务器在每次保存前检查；同一 PHP 主机内，本插件的写入使用 `flock` + SHA-256 CAS + 写后读回验证。
 - 断网/冲突时禁止继续改动，保留本机恢复草稿；KodBox 弹窗关闭时提示未同步状态。
 - 仅允许将旧 HTML 导入空白 `.foldmemo`，禁止替换不同 ID 的现有保险库。
+- 所有删除、明文风险和导入确认均使用 Vue 内嵌模态窗口，无需手机浏览器原生 `confirm()`。
 
 ## 安装
 
@@ -25,6 +26,7 @@ npm ci
 npm run build:kodbox
 cd ..
 node plugins/foldMemo/test-bridge.cjs
+node vue-app/scripts/mobile-confirm-regression.mjs
 php -l plugins/foldMemo/app.php
 php plugins/foldMemo/test-server.php
 ```

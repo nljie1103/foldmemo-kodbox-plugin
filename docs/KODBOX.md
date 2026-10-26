@@ -1,4 +1,4 @@
-# FoldMemo KodBox 插件 · v0.1.1
+# FoldMemo KodBox 插件 · v0.1.2
 
 本插件适用于已安装 KodBox 的 PHP 服务器。程序资源与 `.foldmemo` 保险库分离。安装测试请勿使用重要真实密码。
 
@@ -11,6 +11,10 @@
 5. 旧 HTML 导入：备份原文件，在 KodBox 新建**空白** `.foldmemo` 再进行导入；不允许覆盖其他 ID 的云端保险库。
 
 从 GitHub 源码构建必须在 `vue-app` 运行 `npm ci` 和 `npm run build:kodbox`，生成 `plugins/foldMemo/static/app/index.html` 与 `assets/`；然后执行 `node plugins/foldMemo/test-bridge.cjs`、`php -l plugins/foldMemo/app.php` 和 `php plugins/foldMemo/test-server.php`。
+
+## 手机端删除验收
+
+打开 `test.foldmemo`，使用手机依次测试：新建一条测试记录 → 点击删除 → 点击取消应保留原记录 → 再点击删除并确认应进入回收站 → 从回收站恢复应返回记录列表 → 再次删除并选择永久删除应不可恢复。分类页面也需测试删除确认。删除后等待“云端已保存”，关闭重开验证结果。所有确认弹窗由应用内 Vue Dialog 提供，不再使用浏览器原生 `confirm()`。
 
 ## 保存链路
 

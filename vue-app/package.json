@@ -1,6 +1,6 @@
 {
   "name": "foldmemo-kodbox-ui",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "type": "module",
   "scripts": {
@@ -15,7 +15,8 @@
     "test:note-category": "node --no-warnings --experimental-strip-types scripts/note-category-regression.mjs",
     "test:write-gate": "node scripts/write-gate-regression.mjs",
     "test:kodbox": "node ../plugins/foldMemo/test-bridge.cjs",
-    "test:kodbox-php": "php ../plugins/foldMemo/test-server.php"
+    "test:kodbox-php": "php ../plugins/foldMemo/test-server.php",
+    "test:mobile-confirm": "node scripts/mobile-confirm-regression.mjs"
   },
   "dependencies": {
     "vue": "^3.5.0",

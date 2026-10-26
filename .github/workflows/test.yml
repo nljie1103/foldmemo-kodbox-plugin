@@ -21,6 +21,9 @@ jobs:
       - name: Vue typecheck and asset build
         working-directory: vue-app
         run: npm run build:kodbox
+      - name: Mobile confirm regression
+        working-directory: vue-app
+        run: npm run test:mobile-confirm
       - name: KodBox bridge regression
         run: node plugins/foldMemo/test-bridge.cjs
       - name: PHP syntax and server mock regression
